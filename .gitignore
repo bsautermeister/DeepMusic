@@ -100,6 +100,10 @@ ENV/
 # mypy
 .mypy_cache/
 
+# PyCharm
+.idea/
+
 # Music files
 *.mp3
+*.wav
 *.bin
