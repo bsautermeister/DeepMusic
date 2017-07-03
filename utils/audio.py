@@ -91,3 +91,33 @@ def from_sample_blocks(block_list):
     """
     audio = np.concatenate(block_list)
     return audio
+
+
+def to_fft_blocks(block_list):
+    """
+    Converts audio blocks in time domain to frequency domain.
+    :param block_list: The audio blocks in time domain.
+    :return: List of audio blocks in frequency domain.
+    """
+    fft_list = []
+    for block in block_list:
+        fft_block = np.fft.fft(block)
+        new_block = np.concatenate((np.real(fft_block), np.imag(fft_block)))
+        fft_list.append(new_block)
+    return fft_list
+
+
+def from_fft_blocks(fft_list):
+    """
+    Converts audio blocks in frequency domain to time domain.
+    :param fft_list: The audio blocks in frquency domain.
+    :return:  List of audio blocks in time domain.
+    """
+    block_list = []
+    for block in fft_list:
+        num_elems = int(block.shape[0] / 2)
+        real_elems = block[0:num_elems]
+        imag_elems = block[num_elems:]
+        block = np.fft.ifft(real_elems + 1.0j * imag_elems)
+        block_list.append(block)
+    return block_list
