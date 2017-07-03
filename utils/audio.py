@@ -43,17 +43,51 @@ def read_from_wav(filepath):
     :return: Returns a tuple (audio data, sample rate).
     """
     data = wav.read(filepath)
-    ndarray = data[1].astype(np.float32) / 32767.0  # normalize to [-1, 1]
-    return ndarray, data[0]
+    audio = data[1].astype(np.float32) / 32767.0  # normalize to [-1, 1]
+    return audio, data[0]
 
 
-def write_as_wav(ndarray, filepath, sample_rate):
+def write_as_wav(audio, filepath, sample_rate):
     """
     Writes the numpy array to a WAV file.
     :param ndarray: The audio data.
     :param filepath: The path to write the audio file.
     :param sample_rate: The audio sampling rate.
     """
-    data = ndarray * 32767.0  # unnormalize
+    data = audio * 32767.0  # unnormalize
     data = data.astype(np.int16)
     wav.write(filepath, sample_rate, data)
+
+
+def to_sample_blocks(audio, block_size):
+    """
+    Converts a numpy audio data array to a list of smaller blocks.
+    :param audio: The audio data array.
+    :param block_size: The block size.
+    :return: A list of numpy arrays.
+    """
+    block_list = []
+    total_samples = audio.shape[0]
+    samples_counter = 0
+
+    while samples_counter < total_samples:
+        block = audio[samples_counter:samples_counter + block_size]
+
+        if block.shape[0] < block_size:
+            # pad audio with zeros
+            padding = np.zeros((block_size - block.shape[0],))
+            block = np.concatenate((block, padding))
+
+        block_list.append(block)
+        samples_counter += block_size
+    return block_list
+
+
+def from_sample_blocks(block_list):
+    """
+    Converts to an audio array given a list of samples blocks.
+    :param block_list: The list of audio blocks.
+    :return: The audio numpy array.
+    """
+    audio = np.concatenate(block_list)
+    return audio
